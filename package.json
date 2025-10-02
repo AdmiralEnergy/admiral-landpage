@@ -4,5 +4,9 @@
   "private": true,
   "scripts": {
     "favicons": "node scripts/gen-favicons.js"
+  },
+  "devDependencies": {
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.33.0"
   }
 }

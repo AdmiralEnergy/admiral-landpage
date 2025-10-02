@@ -8,6 +8,8 @@
   <meta name="supported-color-schemes" content="light" />
   <meta name="theme-color" content="#f7f5f2" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="canonical" href="https://admiralenergy.netlify.app/" />
+  <meta name="robots" content="index,follow" />
 
   <title>Admiral Energy — Lower Bills. Quiet Backup. Solar That Fits.</title>
 
@@ -27,6 +29,24 @@
   <meta property="og:url" content="https://admiralenergy.netlify.app" />
   <meta property="og:site_name" content="Admiral Energy" />
 
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LocalBusiness",
+    "name":"Admiral Energy",
+    "image":"https://admiralenergy.netlify.app/assets/share-image.png",
+    "url":"https://admiralenergy.netlify.app/",
+    "telephone":"+1-000-000-0000",
+    "address":{
+      "@type":"PostalAddress",
+      "addressLocality":"Charlotte",
+      "addressRegion":"NC",
+      "addressCountry":"US"
+    },
+    "areaServed":"Charlotte, NC"
+  }
+  </script>
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Admiral Energy — Lower Bills. Quiet Backup. Solar That Fits." />
@@ -40,7 +60,29 @@
 
   <!-- Calendly -->
   <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
-  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <script>
+    let calendlyLoaded = false;
+    function ensureCalendly(cb){
+      if (calendlyLoaded) { cb(); return; }
+      const s = document.createElement('script');
+      s.src = 'https://assets.calendly.com/assets/external/widget.js';
+      s.async = true;
+      s.onload = () => { calendlyLoaded = true; cb(); };
+      document.head.appendChild(s);
+    }
+    window.openCalendlyPrefilled = function(firstName, email){
+      ensureCalendly(()=>{
+        try {
+          Calendly.initPopupWidget({
+            url:
+              'https://calendly.com/admiral-energy/15min?hide_event_type_details=1&hide_gdpr_banner=1' +
+              (firstName ? `&name=${encodeURIComponent(firstName)}` : '') +
+              (email ? `&email=${encodeURIComponent(email)}` : '')
+          });
+        } catch(_) {}
+      });
+    };
+  </script>
 
   <!-- GTM -->
   <script>
@@ -125,6 +167,10 @@
       .actions .btn{flex:1 1 100%;min-width:0}
       video{width:100%;height:auto}
     }
+
+    @media (prefers-reduced-motion: reduce){
+      * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -146,7 +192,7 @@
         <!-- Lead / Hero minimal form (ZIP + Utility) -->
         <div class="card cardPad">
           <form id="heroForm" class="cta" onsubmit="return false">
-            <input required id="zip" name="zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="ZIP code" aria-label="ZIP code" />
+            <input required id="zip" name="zip" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" placeholder="ZIP code" aria-label="ZIP code" />
             <select required id="utility" name="utility" aria-label="Utility">
               <option value="" disabled selected>Utility</option>
               <option value="duke">Duke Energy</option>
@@ -160,7 +206,7 @@
       </div>
 
       <div class="card">
-        <video id="admiralExplainer" class="cardPad" style="border-radius:16px" playsinline muted loop preload="metadata"
+        <video id="admiralExplainer" class="cardPad" style="border-radius:16px" playsinline muted loop preload="metadata" poster="/assets/admiral-bill-explainer-poster.png"
                src="/assets/admiral-intro.mp4"></video>
         <div class="cardPad" style="display:flex;justify-content:flex-end"><button id="explainerMute" class="btn btn-secondary" type="button">🔊 Mute</button></div>
       </div>
@@ -182,17 +228,18 @@
       <!-- Step 2: Contact info (LEAD CAPTURE) -->
       <div class="quiz-step" data-step="2">
         <h3 style="margin-top:0;color:var(--primary-navy)">Where should we send your savings report?</h3>
-        <form id="leadForm" name="lead-capture" method="POST" data-netlify="true">
+        <form id="leadForm" name="lead-capture" method="POST" data-netlify="true" data-netlify-honeypot="bot-field">
           <input type="hidden" name="form-name" value="lead-capture" />
+          <p hidden><label>Don’t fill this out if you’re human: <input name="bot-field" autocomplete="off"></label></p>
           <input type="hidden" name="lead_id" id="lead_id" />
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-            <input required name="first_name" id="firstName" placeholder="First name" />
-            <input required name="last_name" id="lastName" placeholder="Last name" />
-            <input required type="email" name="email" id="email" placeholder="Email" />
-            <input required name="phone" id="phone" placeholder="Phone" />
+            <input required name="first_name" id="firstName" placeholder="First name" autocomplete="given-name" />
+            <input required name="last_name" id="lastName" placeholder="Last name" autocomplete="family-name" />
+            <input required type="email" name="email" id="email" placeholder="Email" autocomplete="email" inputmode="email" />
+            <input required type="tel" name="phone" id="phone" placeholder="Phone" autocomplete="tel" inputmode="tel" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem">
-            <input required name="zip" id="zip_hidden" placeholder="ZIP" />
+            <input required name="zip" id="zip_hidden" placeholder="ZIP" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" />
             <input required name="utility" id="utility_hidden" placeholder="Utility" />
           </div>
           <input type="hidden" name="bill_amount" id="bill_hidden" />
@@ -236,7 +283,7 @@
             <button class="btn btn-secondary" id="openBillUpload">📎 Upload Duke bill (faster quote)</button>
           </div>
           <div>
-            <video class="admiral-explainer" playsinline muted loop preload="metadata" style="width:100%;border-radius:16px" src="/assets/admiral-intro.mp4"></video>
+            <video class="admiral-explainer" playsinline muted loop preload="metadata" poster="/assets/admiral-bill-explainer-poster.png" style="width:100%;border-radius:16px" src="/assets/admiral-intro.mp4"></video>
             <p style="color:var(--text-gray);font-size:.9rem;margin:.35rem 0 0">We use your address (roof & sun) + kWh from your bill to size your system precisely.</p>
           </div>
         </div>
@@ -261,18 +308,19 @@
   </main>
 
   <!-- Bill Upload Modal (Netlify form) -->
-  <div class="modal" id="billModal" aria-hidden="true">
+  <div class="modal" id="billUploadModal" role="dialog" aria-modal="true" aria-labelledby="billModalTitle" aria-hidden="true">
     <div class="box">
-      <form id="bill-upload" name="bill-upload" method="POST" data-netlify="true" enctype="multipart/form-data">
+      <form id="bill-upload" name="bill-upload" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data">
         <input type="hidden" name="form-name" value="bill-upload" />
+        <p hidden><label>Don’t fill this out if you’re human: <input name="bot-field" autocomplete="off"></label></p>
         <input type="hidden" name="lead_id" id="bu_lead_id" />
         <input type="hidden" name="email" id="bu_email" />
         <input type="hidden" name="first_name" id="bu_first_name" />
         <input type="hidden" name="phone" id="bu_phone" />
         <input type="hidden" name="opt_in" id="bu_opt_in" value="no" />
 
-        <h3 style="margin:0 0 .25rem">Upload your Duke bill (front page)</h3>
-        <p style="margin:.25rem 0;color:var(--text-gray)">We use your <strong>address</strong> (roof & sun) and <strong>kWh</strong> (system size). You may hide your account #. <a href="/assets/duke-bill-sample.png" target="_blank" rel="noopener">See sample</a>.</p>
+        <h3 id="billModalTitle" style="margin:0 0 .25rem">Upload your Duke bill (front page)</h3>
+        <p style="margin:.25rem 0;color:var(--text-gray)">We use your <strong>address</strong> (roof & sun) and <strong>kWh</strong> (system size). You may hide your account #. <a href="/assets/duke-bill-sample.png" target="_blank" rel="noopener noreferrer">See sample</a>.</p>
 
         <div id="bu_drop" class="upload-zone" role="button" tabindex="0">📁 Drag & drop or click — PDF/JPG/PNG/HEIC (max 10 MB)</div>
         <button type="button" id="bu_attach_btn" class="btn btn-secondary" style="width:100%;margin-top:.5rem">📎 Attach bill</button>
@@ -296,8 +344,9 @@
   </div>
 
   <!-- Exit Intent (Netlify form) -->
-  <form id="exit-form" name="exit-intent-capture" method="POST" data-netlify="true" hidden>
+  <form id="exit-form" name="exit-intent-capture" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
     <input type="hidden" name="form-name" value="exit-intent-capture" />
+    <p hidden><label>Don’t fill this out if you’re human: <input name="bot-field" autocomplete="off"></label></p>
     <input type="hidden" name="email" id="exit_email" />
     <input type="hidden" name="zip" id="exit_zip" />
     <input type="hidden" name="utility" id="exit_utility" />
@@ -427,16 +476,11 @@
     }
 
     // Calendly
+    const baseOpenCalendly = window.openCalendlyPrefilled;
     window.openCalendlyPrefilled = function(firstName, email){
-      try {
-        Calendly.initPopupWidget({
-          url: 'https://calendly.com/admiral-energy/15min?hide_event_type_details=1&hide_gdpr_banner=1' +
-               (firstName?`&name=${encodeURIComponent(firstName)}`:'') +
-               (email?`&email=${encodeURIComponent(email)}`:'')
-        });
-        aeEvt('calendly_opened', { value:750, currency:'USD', lead_id: leadId });
-      } catch(_){}
-    }
+      baseOpenCalendly?.(firstName, email);
+      aeEvt('calendly_opened', { value:750, currency:'USD', lead_id: leadId });
+    };
     $('#bookCall').addEventListener('click', ()=>{
       const s = loadState();
       openCalendlyPrefilled(s?.firstName||'', s?.email||'');
@@ -455,7 +499,7 @@
 
     // Bill Upload Modal logic
     (function(){
-      const modal = $('#billModal');
+      const modal = $('#billUploadModal');
       const openBtn = $('#openBillUpload');
       const closeBtn = $('#bu_close');
       const form = $('#bill-upload');
@@ -467,10 +511,42 @@
       const attachBtn = $('#bu_attach_btn');
       const skipBtn = $('#bu_skip');
       let picking = false;
+      let lastActive = null;
 
-      function open(){ modal.style.display='block'; modal.setAttribute('aria-hidden','false'); syncHidden(); }
-      function close(){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
-      openBtn.addEventListener('click', open); closeBtn.addEventListener('click', close);
+      if (!modal || !form || !drop || !input || !submitBtn) return;
+
+      function trapFocus(e){
+        if (modal.getAttribute('aria-hidden') === 'true') return;
+        const focusables = modal.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.key === 'Tab'){
+          if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+        } else if (e.key === 'Escape'){
+          e.preventDefault(); close();
+        }
+      }
+
+      function open(){
+        lastActive = document.activeElement;
+        modal.style.display='block';
+        modal.setAttribute('aria-hidden','false');
+        syncHidden();
+        const firstFocusable = modal.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+        (firstFocusable || modal).focus();
+        document.addEventListener('keydown', trapFocus, true);
+      }
+      function close(){
+        modal.style.display='none';
+        modal.setAttribute('aria-hidden','true');
+        document.removeEventListener('keydown', trapFocus, true);
+        if (lastActive) lastActive.focus();
+      }
+      if (openBtn)  openBtn.addEventListener('click', open);
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e)=>{ if (e.target === modal) close(); });
 
       function syncHidden(){
         const s = loadState() || {};
